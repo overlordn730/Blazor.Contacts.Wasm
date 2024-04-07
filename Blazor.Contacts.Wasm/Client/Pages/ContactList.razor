@@ -1,0 +1,97 @@
+﻿@page "/contactlist"
+
+@inject IContactService ContactService
+@inject NavigationManager NavigationManager
+
+<h3>Contactos</h3>
+
+@Message
+
+<table>
+    <tbody>
+        <tr>
+            <td colspan="2"><a href="/contactdetail">Agregar Nuevo</a></td>
+        </tr>
+    </tbody>
+</table>
+
+@if (contacts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <RadzenDataGrid AllowFiltering="true" 
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterMode="FilterMode.Advanced"
+                AllowPaging="true"
+                PageSize="4" 
+                AllowSorting="true" 
+                Data="@contacts" 
+                TItem="Contact" 
+                ColumnWidth="200px">
+
+                <Columns>
+                    <RadzenDataGridColumn TItem="Contact" Property="FullName" Title="Nombre" />
+                    <RadzenDataGridColumn TItem="Contact" Property="Phone" Title="Teléfono" />
+                    <RadzenDataGridColumn TItem="Contact" Property="Address" Title="Direccion" />
+                    <RadzenDataGridColumn TItem="Contact" Title="Editar">
+                        <Template Context="data">
+                            <RadzenLink Path="@($"/contactdetail/{data.Id}")" Text="Editar"></RadzenLink>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Contact" Title="Eliminar">
+                        <Template Context="data">
+                            <RadzenLink Path="@($"/contactdelete/{data.Id}")" Text="Eliminar"></RadzenLink>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+    </RadzenDataGrid> 
+
+    @*@<table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Telefono</th>
+                <th>Direccion</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in contacts)
+            {
+                <tr>
+                    <td>@contact.FullName</td>
+                    <td>@contact.Phone</td>
+                    <td>@contact.Address</td>
+                    <td><a href="/contactdetail/@contact.Id">Editar</a></td>
+                    <td><a href="/contactdelete/@contact.Id">Borrar</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>*@
+
+}
+
+@code {
+    public string Message { get; set; }
+
+    IEnumerable<Contact> contacts;
+    RadzenDataGrid<Contact> grid;
+
+    FilterCaseSensitivity filterCaseSensitivity = FilterCaseSensitivity.CaseInsensitive;
+    LogicalFilterOperator logicalFilterOperator = LogicalFilterOperator.Or;
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            contacts = await ContactService.GetAllContacts();
+        }
+        catch (Exception e)
+        {
+            Message = "Error... " + e.Message;
+        }
+    }
+}

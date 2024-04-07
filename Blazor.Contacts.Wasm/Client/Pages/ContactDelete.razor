@@ -1,0 +1,95 @@
+﻿@page "/contactdelete/{id:int}"
+
+@inject IContactService ContactService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+@if (contact == null){
+    <p><em>Loading...</em></p>
+}else{
+
+    <RadzenTemplateForm Data="@contact">
+        <div class="card">
+            <div class="card-body">
+                <div class="container">
+                    <RadzenFieldset Text="Detalles del Contacto">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="">Primer Nombre</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.FirstName"></RadzenTextBox>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="">Segundo Nombre</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.LastName"></RadzenTextBox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="">Teléfono</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.Phone"></RadzenTextBox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="">Direccion</label>
+                                <RadzenTextArea class="form-control" @bind-Value="@contact.Address"></RadzenTextArea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <RadzenButton Text="Borrar" ButtonStyle="ButtonStyle.Danger" Click="@(args => Borrar())" />
+                                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Dark" Click="@(args => NavigateContactList())" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}
+
+@code {
+    public Contact contact;
+
+    [Parameter]
+    public int id { get; set; }
+
+    protected async override Task OnInitializedAsync(){
+        if (id == 0)
+            contact = new Contact();
+        else
+            contact = await ContactService.GetContactById(id);
+    }
+
+    protected async Task Borrar()
+    {
+        await ContactService.DeleteContact(id);
+        ShowNotification();
+        NavigateContactList();
+    }
+
+    private void NavigateHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateContactList()
+    {
+        if (id != 0)
+            NavigationManager.NavigateTo("/contactlist");
+        else
+            NavigateHome();
+    }
+
+    private void ShowNotification()
+    {
+        NotificationService.Notify(NotificationSeverity.Success, "Éxito", "¡Contacto eliminado exitosamente!");
+    }
+}

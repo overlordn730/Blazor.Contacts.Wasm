@@ -1,0 +1,143 @@
+﻿@page "/contactdetail"
+@page "/contactdetail/{id:int}"
+
+@inject IContactService ContactService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+@if (contact == null){
+    <p><em>Loading...</em></p>
+}else{
+    <RadzenTemplateForm Data="@contact">
+        <div class="card">
+            <div class="card-body">
+                <div class="container">
+
+                    <RadzenFieldset Text="Detalles del Contacto">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="">Primer Nombre</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.FirstName"></RadzenTextBox>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="">Segundo Nombre</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.LastName"></RadzenTextBox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="">Teléfono</label>
+                                <RadzenTextBox class="form-control" @bind-Value="@contact.Phone"></RadzenTextBox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="">Direccion</label>
+                                <RadzenTextArea class="form-control" @bind-Value="@contact.Address"></RadzenTextArea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="@(args => Guardar())" />
+                                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="@(args => NavigateContactList())" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+
+    @* <EditForm Model="contact" OnValidSubmit="Guardar">
+        <div class="card">
+            <h5 class="card-header"> Detalles del Contacto </h5>
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="">Primer Nombre</label>
+                        <InputText class="form-control" @bind-Value="@contact.FirstName"></InputText>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Segundo Nombre</label>
+                        <InputText class="form-control" @bind-Value="@contact.LastName"></InputText>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="">Teléfono</label>
+                        <InputText class="form-control" @bind-Value="@contact.Phone"></InputText>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="">Direccion</label>
+                        <InputTextArea class="form-control" @bind-Value="@contact.Address"></InputTextArea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <input type="submit" class="btn-success" value="Guardar" />
+                        <input type="button" class="btn-secondary" value="Cancelar" @onclick="NavigateContactList" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </EditForm> *@
+}
+
+@code {
+    public Contact contact;
+
+    [Parameter]
+    public int id { get; set; }
+
+    protected async override Task OnInitializedAsync(){
+        if (id == 0)
+            contact = new Contact();
+        else
+            contact = await ContactService.GetContactById(id);
+    }
+
+    protected async Task Guardar()
+    {
+        await ContactService.SaveContact(contact);
+        ShowNotification();
+        NavigateContactList();
+    }
+
+    private void NavigateHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateContactList()
+    {
+        if (id != 0)
+            NavigationManager.NavigateTo("/contactlist");
+        else
+            NavigateHome();
+    }
+
+    private void ShowNotification()
+    {
+        NotificationService.Notify(NotificationSeverity.Success, "Éxito", "¡Contacto guardado exitosamente!");
+    }
+}
